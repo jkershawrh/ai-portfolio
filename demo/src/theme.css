@@ -1,0 +1,57 @@
+@import url('https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@400;700;800&family=Red+Hat+Mono:wght@400;600;700&family=Red+Hat+Text:wght@400;500;600;700&display=swap');
+
+:root {
+  --rh-red: #ee0000;
+  --rh-red-dim: rgba(238, 0, 0, 0.12);
+  --rh-orange: #f0561d;
+  --rh-orange-dim: rgba(240, 86, 29, 0.12);
+  --rh-green: #63993d;
+  --rh-green-dim: rgba(99, 153, 61, 0.12);
+  --rh-teal: #37a3a3;
+  --rh-teal-dim: rgba(55, 163, 163, 0.12);
+  --rh-purple: #5e40be;
+  --rh-purple-dim: rgba(94, 64, 190, 0.12);
+  --rh-yellow: #ffcc17;
+  --rh-yellow-dim: rgba(255, 204, 23, 0.12);
+  --rh-blue: #0066cc;
+  --rh-blue-dim: rgba(0, 102, 204, 0.12);
+
+  --bg-dark: #151515;
+  --surface-1: #1f1f1f;
+  --surface-2: #292929;
+  --border: #383838;
+
+  --text-primary: #ffffff;
+  --text-secondary: #c7c7c7;
+  --text-dim: #a3a3a3;
+  --text-disabled: #707070;
+
+  --layer-0: #0066cc;
+  --layer-1: #004080;
+  --layer-2: #006644;
+  --layer-3: #336600;
+  --layer-4: #664400;
+  --layer-5: #cc0000;
+  --layer-6: #663399;
+  --layer-7: #555555;
+
+  --node-platform: #ee0000;
+  --node-quickstart: #a3a3a3;
+  --node-product: #0066cc;
+  --node-hardware: #37a3a3;
+  --node-oss: #63993d;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Red Hat Text', sans-serif;
+  background: var(--bg-dark);
+  color: var(--text-primary);
+  overflow: hidden;
+}
+
+#root {
+  width: 100vw;
+  height: 100vh;
+}
