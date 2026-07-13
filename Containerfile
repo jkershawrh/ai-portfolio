@@ -1,0 +1,19 @@
+FROM node:20-slim AS build
+WORKDIR /app
+COPY demo/package.json demo/package-lock.json ./
+RUN npm ci
+COPY demo/ .
+RUN npm run build
+
+FROM nginx:alpine
+USER root
+RUN mkdir -p /var/cache/nginx/client_temp /var/cache/nginx/proxy_temp \
+             /var/cache/nginx/fastcgi_temp /var/cache/nginx/uwsgi_temp \
+             /var/cache/nginx/scgi_temp && \
+    chmod -R 777 /var/cache/nginx /var/run /var/log/nginx && \
+    sed -i 's/^user  nginx;/#user  nginx;/' /etc/nginx/nginx.conf
+COPY --from=build /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+USER 1001
+EXPOSE 3000
+CMD ["nginx", "-g", "daemon off;"]

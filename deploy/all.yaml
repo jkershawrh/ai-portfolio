@@ -1,0 +1,112 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ai-portfolio
+  labels:
+    app.kubernetes.io/part-of: ai-portfolio
+  annotations:
+    openshift.io/display-name: "AI Sovereignty Portfolio"
+    openshift.io/description: "Interactive visualization of the Red Hat AI Sovereignty Stack"
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ai-portfolio-oauth
+  namespace: ai-portfolio
+  annotations:
+    serviceaccounts.openshift.io/oauth-redirectreference.primary: '{"kind":"OAuthRedirectReference","apiVersion":"v1","reference":{"kind":"Route","name":"ai-portfolio"}}'
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-portfolio
+  namespace: ai-portfolio
+  labels:
+    app: ai-portfolio
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ai-portfolio
+  template:
+    metadata:
+      labels:
+        app: ai-portfolio
+    spec:
+      serviceAccountName: ai-portfolio-oauth
+      containers:
+        - name: oauth-proxy
+          image: registry.redhat.io/openshift4/ose-oauth-proxy:latest
+          args:
+            - --https-address=:8443
+            - --provider=openshift
+            - --openshift-service-account=ai-portfolio-oauth
+            - --upstream=http://localhost:3000
+            - --tls-cert=/etc/tls/private/tls.crt
+            - --tls-key=/etc/tls/private/tls.key
+            - --cookie-secret=YWktcG9ydGZvbGlvLXNvdg==
+            - --pass-basic-auth=false
+          ports:
+            - containerPort: 8443
+              name: https
+          volumeMounts:
+            - name: tls
+              mountPath: /etc/tls/private
+              readOnly: true
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 128Mi
+        - name: demo
+          image: image-registry.openshift-image-registry.svc:5000/ai-portfolio/ai-portfolio:latest
+          ports:
+            - containerPort: 3000
+              name: http
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 128Mi
+      volumes:
+        - name: tls
+          secret:
+            secretName: ai-portfolio-tls
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-portfolio
+  namespace: ai-portfolio
+  labels:
+    app: ai-portfolio
+  annotations:
+    service.beta.openshift.io/serving-cert-secret-name: ai-portfolio-tls
+spec:
+  selector:
+    app: ai-portfolio
+  ports:
+    - port: 8443
+      targetPort: 8443
+      name: https
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: ai-portfolio
+  namespace: ai-portfolio
+  labels:
+    app: ai-portfolio
+spec:
+  to:
+    kind: Service
+    name: ai-portfolio
+  port:
+    targetPort: https
+  tls:
+    termination: reencrypt
+    insecureEdgeTerminationPolicy: Redirect
